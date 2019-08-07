@@ -3,6 +3,7 @@
 ## Get it
 ### Maven
 Add the JitPack repository to build file
+
 ```xml
 <repositories>
     <repository>
@@ -11,7 +12,9 @@ Add the JitPack repository to build file
     </repository>
 </repositories>
 ```
+
 Add dependency
+
 ```xml
 <dependency>
     <groupId>com.github.METADIUM</groupId>
@@ -21,6 +24,7 @@ Add dependency
 ```
 ### Gradle
 Add root build.gradle
+
 ```gradle
 allprojects {
     repositories {
@@ -29,6 +33,7 @@ allprojects {
 }
 ```
 Add dependency
+
 ```gradle
 dependencies {
     implementation 'com.github.METADIUM:verifiable-credential-java:0.1'
