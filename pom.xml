@@ -3,12 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.metadium</groupId>
-  <artifactId>vc</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1</version>
+  <artifactId>verifiable-credential-java</artifactId>
   <packaging>jar</packaging>
-
-  <name>vc</name>
-  <url>http://maven.apache.org</url>
+  
+  <name>Metadium Verifiable Credential </name>
+  <url>https://github.com/METADIUM/verifiable-credential-java</url>
+  <description>Java library for Verifiable credentail</description>
+  
+  <organization>
+  	<name>Metadium</name>
+  	<url>https://www.metadium.com</url>
+  </organization>
+  
+  <scm>
+  	<url>https://github.com/METADIUM/verifiable-credential-java</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
