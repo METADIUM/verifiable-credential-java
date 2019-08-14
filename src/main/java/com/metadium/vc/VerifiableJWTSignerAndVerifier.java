@@ -44,7 +44,7 @@ public class VerifiableJWTSignerAndVerifier {
 	 * @return signed JWT
 	 * @throws JOSEException 
 	 */
-	public JWSObject sign(Verifiable verifiable, JWSAlgorithm algorithm, URI kid, String nonce, JWSSigner signer) throws JOSEException  {
+	public JWSObject sign(Verifiable verifiable, JWSAlgorithm algorithm, String kid, String nonce, JWSSigner signer) throws JOSEException  {
 		String jsonString;
 		if (verifiable instanceof VerifiableCredential) {
 			jsonString = credentialToJWT((VerifiableCredential)verifiable, nonce);

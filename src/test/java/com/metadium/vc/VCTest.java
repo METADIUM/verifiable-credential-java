@@ -95,7 +95,7 @@ public class VCTest {
 		VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
 		try {
 			//	Sign VC with ES256k (secp256k1).  keyID, nonce, private key
-			JWSObject jwsObject = signer.sign(vc, JWSAlgorithm.ES256K, URI.create("did:meta:0x3489384932859420#key1"), "0d8mf03", new ECDSASigner(privateKey));
+			JWSObject jwsObject = signer.sign(vc, JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
 			String token = jwsObject.serialize();
 			System.out.println("vctest vc JWTs");
 			System.out.println(token);
@@ -151,7 +151,7 @@ public class VCTest {
 			System.out.println(vp.toJSONString());
 			
 			// Sign verifiable presentation with ES256k (secp256k1). keyID, nonce, private key
-			JWSObject vpObject = signer.sign(vp, JWSAlgorithm.ES256K, URI.create("did:meta:0x3489384932859420#key1"), "0d8mf03", new ECDSASigner(privateKey));
+			JWSObject vpObject = signer.sign(vp, JWSAlgorithm.ES256K, "did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(privateKey));
 			String vpToken = vpObject.serialize();
 			
 			System.out.println("vptest vp JWTs");
