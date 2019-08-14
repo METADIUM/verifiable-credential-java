@@ -19,7 +19,7 @@ Add dependency
 <dependency>
     <groupId>com.github.METADIUM</groupId>
     <artifactId>verifiable-credential-java</artifactId>
-    <version>0.1</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 ### Gradle
@@ -36,7 +36,7 @@ Add dependency
 
 ```gradle
 dependencies {
-    implementation 'com.github.METADIUM:verifiable-credential-java:0.1-1'
+    implementation 'com.github.METADIUM:verifiable-credential-java:0.1.1'
 }
 ```
 If use Google service plug-in in android, add code
@@ -72,7 +72,7 @@ VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
 JWSObject jwsObject = signer.sign(
     verifiableCredential,                           // verifiable credential
     JWSAlgorithm.ES256K,
-    URI.create("did:meta:0x3489384932859420#key1"), // key id of signer
+    "did:meta:0x348938499420#managementKey#4358",   // key id of signer
     "0d8mf03",                                      // nonce
     new ECDSASigner(privateKey)
 );
@@ -107,7 +107,7 @@ VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
 JWSObject jwsObject = signer.sign(
     verifiablePresentation,                         // Verifiable presentation
     JWSAlgorithm.ES256K, 
-    URI.create("did:meta:0x3489384932859420#key1"), // key id of holder
+    "did:meta:0x348938499420#managementKey#4358",   // key id of holder
     "0d8mf03",                                      // nonce
     new ECDSASigner(privateKey)
 );
