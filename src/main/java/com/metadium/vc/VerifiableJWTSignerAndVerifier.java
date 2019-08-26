@@ -57,7 +57,7 @@ public class VerifiableJWTSignerAndVerifier {
 		}
 		
 		// sign to JWT
-		JWSHeader jwsHeader = new JWSHeader(algorithm, JOSEObjectType.JWT, null, null, null, null, null, null, null, null, kid.toString(), null, null);
+		JWSHeader jwsHeader = new JWSHeader(algorithm, JOSEObjectType.JWT, null, null, null, null, null, null, null, null, kid, null, null);
 		JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(jsonString));
 		jwsObject.sign(signer);
 		return jwsObject;
