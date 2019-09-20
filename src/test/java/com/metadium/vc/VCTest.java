@@ -29,11 +29,11 @@ import com.metadium.vc.util.ECKeyUtils;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.StandardCharset;
+import com.nimbusds.jwt.SignedJWT;
 
 public class VCTest {
 	static BCECPrivateKey privateKey;
@@ -95,16 +95,16 @@ public class VCTest {
 		System.out.println("vctest vc");
 		System.out.println(vc.toJSONString());
 		
-		VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
 		try {
 			//	Sign VC with ES256k (secp256k1).  keyID, nonce, private key
-			JWSObject jwsObject = signer.sign(vc, JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
-			String token = jwsObject.serialize();
+			SignedJWT signedJWT = VerifiableSignedJWT.sign(vc, JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
+			String token = signedJWT.serialize();
 			System.out.println("vctest vc JWTs");
 			System.out.println(token);
 			
 			// verify SignedVC
-			VerifiableCredential verifiedVc = (VerifiableCredential)signer.verify(token, new ECDSAVerifier(publicKey));
+			assertTrue(signedJWT.verify(new ECDSAVerifier(publicKey)));
+			VerifiableCredential verifiedVc = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(signedJWT);
 			
 			// test
 			assertNotNull(verifiedVc);
@@ -139,7 +139,6 @@ public class VCTest {
 		BCECPrivateKey priKey = (BCECPrivateKey)keyPair.getPrivate();
 		BCECPublicKey pubKey = (BCECPublicKey)keyPair.getPublic();
 		
-		VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
 		try {
 			// Create verifiable presentation
 			VerifiablePresentation vp = new VerifiablePresentation();
@@ -161,7 +160,7 @@ public class VCTest {
 			System.out.println(vp.toJSONString());
 			
 			// Sign verifiable presentation with ES256k (secp256k1). keyID, nonce, private key
-			JWSObject vpObject = signer.sign(vp, JWSAlgorithm.ES256K, "did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(priKey));
+			SignedJWT vpObject = VerifiableSignedJWT.sign(vp, JWSAlgorithm.ES256K, "did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(priKey));
 			String vpToken = vpObject.serialize();
 			
 			System.out.println("test publickey : "+ Hex.toHexString(ECKeyUtils.encodePublicKey(pubKey)));
@@ -169,7 +168,8 @@ public class VCTest {
 			System.out.println(vpToken);
 			
 			// Verify verifiable presentation
-			VerifiablePresentation verifiedVp = (VerifiablePresentation)signer.verify(vpToken, new ECDSAVerifier(pubKey));
+			assertTrue(vpObject.verify(new ECDSAVerifier(pubKey)));
+			VerifiablePresentation verifiedVp = (VerifiablePresentation)VerifiableSignedJWT.toVerifiable(vpObject);
 			
 			// test
 			assertNotNull(verifiedVp);
@@ -184,13 +184,16 @@ public class VCTest {
 			// verify verifiable credential
 			for (Object vc : verifiedVp.getVerifiableCredentials()) {
 				String vcToken = (String)vc;
+				SignedJWT vcJwt = SignedJWT.parse(vcToken);
 				VerifiableCredential verifiedVc;
-				
+
 				if (vcToken.equals(vc1)) {
-					verifiedVc = (VerifiableCredential)signer.verify((String)vc, new ECDSAVerifier(vc1PublicKey));
+					assertTrue(vcJwt.verify(new ECDSAVerifier(vc1PublicKey)));
+					verifiedVc = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(vcJwt);
 				}
 				else if (vcToken.equals(vc2)) {
-					verifiedVc = (VerifiableCredential)signer.verify((String)vc, new ECDSAVerifier(vc2PublicKey));
+					assertTrue(vcJwt.verify(new ECDSAVerifier(vc2PublicKey)));
+					verifiedVc = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(vcJwt);
 				}
 				else {
 					continue;
@@ -210,12 +213,15 @@ public class VCTest {
 		final BCECPublicKey publicKey = ECKeyUtils.toECPublicKey(Hex.decode("04203da4217f9afdf10dce3fb6deca70ccee9fb06754b4fcc8d93ad1dd13115c7f43d1c6438befe67d51d7bec0665cdffe02bbbd2f351081757e7b92dcd948dc99"), "secp256k1");
 		String vp = "eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6bWV0YTo0Mzg5NDgzNSJ9.eyJqdGkiOiJodHRwOlwvXC9hYS5tZXRhZGl1bS5jb21cL3ByZXNcL2ZmZiIsIm5vbmNlIjoidnAgbm9uY2UiLCJ2cCI6eyJ0eXBlIjpbIlZlcmlmaWFibGVQcmVzZW50YXRpb24iLCJOYW1lUHJlc2VudGF0aW9uIl0sIkBjb250ZXh0IjpbImh0dHA6XC9cL3czaWQub3JnXC9jcmVkZW50aWFsc1wvdjEiXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5rc2lMQ0pyYVdRaU9pSmthV1E2YldWMFlUb3pPRGM0TXpRalRXRnVZV2RsYldWdWRFdGxlU000T1RNME9UTTBPQ0o5LmV5SnBZWFFpT2pFMU5qVTVOREUxTURRc0ltcDBhU0k2SW1oMGRIQTZYQzljTDJGaExtMWxkR0ZrYVhWdExtTnZiVnd2WTNKbFpHVnVkR2xoYkZ3dk16UXpJaXdpZG1NaU9uc2lZM0psWkdWdWRHbGhiRk4xWW1wbFkzUWlPbnNpYm1GdFpTSTZJbTFoYm5OMVpDSjlMQ0pBWTI5dWRHVjRkQ0k2V3lKb2RIUndPbHd2WEM5M00ybGtMbTl5WjF3dlkzSmxaR1Z1ZEdsaGJITmNMM1l4SWwwc0luUjVjR1VpT2xzaVZtVnlhV1pwWVdKc1pVTnlaV1JsYm5ScFlXd2lMQ0pPWVcxbFEzSmxaR1Z1ZEdsaGJDSmRmU3dpYm05dVkyVWlPaUp1YjI1alpTSXNJbVY0Y0NJNk1UVTJPRFV6TXpVd05Dd2ljM1ZpSWpvaVpHbGtPbTFsZEdFNk16Z3lOVGM0TXpJMU56RXhNVEV4TVRFeE1URXhNVEV4TVRFeE1URXhNVEV4TVNJc0ltbHpjeUk2SW1ScFpEcHRaWFJoT2pNME9Ea3pPRFUxTkRNeE1qUTFNVE15TlRRek1qVXlNelUwTXpJaWZRLmRtK3NvU2FcLzhja3pVdXFrVzhmaWVtdGIzZjJHYUd1VW5NaTB0Y3FyQjFaV3haSWtiZEtDMWUrOEEyZnNONjJlaFpmQ2hraXdLVEV2Y2pKNTNIcTZRdyIsImV5SmhiR2NpT2lKRlV6STFOa3NpTENKcmFXUWlPaUprYVdRNmJXVjBZVG96T0RjNE16UWpUV0Z1WVdkbGJXVnVkRXRsZVNNNE9UTTBPVE0wT0NKOS5leUpwWVhRaU9qRTFOalU1TkRFMU1EUXNJbXAwYVNJNkltaDBkSEE2WEM5Y0wyRmhMbTFsZEdGa2FYVnRMbU52YlZ3dlkzSmxaR1Z1ZEdsaGJGd3ZNelF6SWl3aWRtTWlPbnNpWTNKbFpHVnVkR2xoYkZOMVltcGxZM1FpT25zaWJtRnRaU0k2SW0xaGJuTjFaQ0o5TENKQVkyOXVkR1Y0ZENJNld5Sm9kSFJ3T2x3dlhDOTNNMmxrTG05eVoxd3ZZM0psWkdWdWRHbGhiSE5jTDNZeElsMHNJblI1Y0dVaU9sc2lWbVZ5YVdacFlXSnNaVU55WldSbGJuUnBZV3dpTENKT1lXMWxRM0psWkdWdWRHbGhiQ0pkZlN3aWJtOXVZMlVpT2lKdWIyNWpaU0lzSW1WNGNDSTZNVFUyT0RVek16VXdOQ3dpYzNWaUlqb2laR2xrT20xbGRHRTZNemd5TlRjNE16STFOekV4TVRFeE1URXhNVEV4TVRFeE1URXhNVEV4TVRFeE1TSXNJbWx6Y3lJNkltUnBaRHB0WlhSaE9qTTBPRGt6T0RVMU5ETXhNalExTVRNeU5UUXpNalV5TXpVME16SWlmUS5kbStzb1NhXC84Y2t6VXVxa1c4ZmllbXRiM2YyR2FHdVVuTWkwdGNxckIxWld4WklrYmRLQzFlKzhBMmZzTjYyZWhaZkNoa2l3S1RFdmNqSjUzSHE2UXciXX0sImlzcyI6ImRpZDptZXRhOjM4OTM0ODkyNDMxMjQ1NDIzNTIzNDU0MzI1NDIzIn0.uQ77WqGiRZECGOncRII/cf1wOT0a2/eTKpc/NHq+q/kksQB+TfICnY2SQmDAYrY1slLfwHRgfWGDH2j0jx+1+g";
 		
-		VerifiableJWTSignerAndVerifier signer = new VerifiableJWTSignerAndVerifier();
-		VerifiablePresentation verifiedVP = (VerifiablePresentation)signer.verify(vp, new ECDSAVerifier(publicKey));
+		SignedJWT signedVp = SignedJWT.parse(vp);
+		assertTrue(signedVp.verify(new ECDSAVerifier(publicKey)));
+		VerifiablePresentation verifiedVP = (VerifiablePresentation)VerifiableSignedJWT.toVerifiable(signedVp);
 		assertNotNull(verifiedVP);
 		if (verifiedVP != null) {
 			for (Object c : verifiedVP.getVerifiableCredentials()) {
-				VerifiableCredential verifiedVC = (VerifiableCredential)signer.verify((String)c, new ECDSAVerifier(publicKey));
+				SignedJWT signedVc = SignedJWT.parse((String)c);
+				assertTrue(signedVc.verify(new ECDSAVerifier(publicKey)));
+				VerifiableCredential verifiedVC = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(signedVc);
 				assertNotNull(verifiedVC);
 			}
 		}		
