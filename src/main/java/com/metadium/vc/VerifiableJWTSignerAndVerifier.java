@@ -28,6 +28,7 @@ import com.nimbusds.jwt.SignedJWT;
  * @author mansud
  *
  */
+@Deprecated
 public class VerifiableJWTSignerAndVerifier {
 	private static final String JSONLD_KEY_CREDENTIAL_SUBJECT_ID = "id";
 	private static final String JWT_HEADER_NONCE = "nonce";
