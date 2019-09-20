@@ -15,7 +15,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -38,7 +37,7 @@ public class VerifiableSignedJWT {
 	 * @param kid key id (DID) of signer. "did:meta:0x384394#key1"
 	 * @param nonce to avoid replay attack
 	 * @param signer signer object. recommend {@link ECDSASigner}
-	 * @return signed JWT
+	 * @return signed verifiable
 	 * @throws JOSEException 
 	 */
 	public static SignedJWT sign(Verifiable verifiable, JWSAlgorithm algorithm, String kid, String nonce, JWSSigner signer) throws JOSEException  {
@@ -62,14 +61,14 @@ public class VerifiableSignedJWT {
 	}
 	
 	/**
-	 * signed JWT to Verifiable
-	 * @param signedJwt signed JWT
-	 * @param verifier verifier object. recommend {@link ECDSAVerifier}
-	 * @throws ParseException invalid signed JWT
+	 * signed verifiable to Verifiable
+	 * @param signedVerifiable signed verifiable
+	 * @return verifiable object
+	 * @throws ParseException invalid signed verifiable
 	 * @throws JOSEException
 	 */
-	public static Verifiable toVerifiable(SignedJWT signedJwt) throws ParseException, JOSEException {
-		JWTClaimsSet claims = signedJwt.getJWTClaimsSet();
+	public static Verifiable toVerifiable(SignedJWT signedVerifiable) throws ParseException, JOSEException {
+		JWTClaimsSet claims = signedVerifiable.getJWTClaimsSet();
 		if (claims.getClaim(JWT_PAYLOAD_VERIFIABLE_CREDENTIAL) != null) {
 			return toCredential(claims);
 		}
@@ -145,7 +144,7 @@ public class VerifiableSignedJWT {
 	 * Convert from verifiable credential to JWT
 	 * @param vc	verifiable credential
 	 * @param nonce to avoid replay attack
-	 * @return JSON string
+	 * @return JWT
 	 */
 	@SuppressWarnings("unchecked")
 	private static JWTClaimsSet credentialToJWT(VerifiableCredential vc, String nonce) {
@@ -205,7 +204,7 @@ public class VerifiableSignedJWT {
 	 * Convert from verifiable presentation to JWT
 	 * @param vc	verifiable presentation
 	 * @param nonce to avoid replay attack
-	 * @return JSON string
+	 * @return JWT
 	 * @throws IOException 
 	 */
 	private static JWTClaimsSet presentationToJWT(VerifiablePresentation vp, String nonce) {
@@ -234,6 +233,11 @@ public class VerifiableSignedJWT {
 		return builder.build();
 	}
 
+	/**
+	 * Map deep copy
+	 * @param src
+	 * @return
+	 */
 	private static LinkedHashMap<String, Object> deepCopy(LinkedHashMap<String, Object> src) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		
