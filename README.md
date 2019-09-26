@@ -19,7 +19,7 @@ Add dependency
 <dependency>
     <groupId>com.github.METADIUM</groupId>
     <artifactId>verifiable-credential-java</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 </dependency>
 ```
 ### Gradle
@@ -36,7 +36,7 @@ Add dependency
 
 ```gradle
 dependencies {
-    implementation 'com.github.METADIUM:verifiable-credential-java:0.1.2'
+    implementation 'com.github.METADIUM:verifiable-credential-java:0.1.3'
 }
 ```
 If use Google service plug-in in android, add code
