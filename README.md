@@ -80,7 +80,7 @@ String signedVcString = signedVc.serialize();
 
 ### Verify VerifiableCredential
 ```java
-SignedJWT signedVc = Signed.parse(signedVcString);
+SignedJWT signedVc = SignedJWT.parse(signedVcString);
 
 // verifying
 if (signedVc.verify(new ECDSAVerifier(publicKey))) {
