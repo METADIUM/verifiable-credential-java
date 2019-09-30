@@ -3,6 +3,7 @@ package com.metadium.vc;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
@@ -75,7 +76,6 @@ public class VCTest {
 		vc.addTypes(Collections.singletonList("NameCredential"));
 		vc.setIssuer(URI.create("did:meta:0x3489384932859420"));
 		vc.setIssuanceDate(issued.getTime());
-		vc.setExpirationDate(expire.getTime());
 		LinkedHashMap<String, String> subject = new LinkedHashMap<>();
 		subject.put("id", "did:meta:0x11111111120");
 		subject.put("name", "mansud");
@@ -88,9 +88,13 @@ public class VCTest {
 		assertTrue(vc.getTypes().contains("NameCredential"));
 		assertEquals("did:meta:0x3489384932859420", vc.getIssuer().toString());
 		assertEquals(issued.getTime().getTime()/1000*1000, vc.getIssunaceDate().getTime());
-		assertEquals(expire.getTime().getTime()/1000*1000, vc.getExpriationDate().getTime());
+		assertNull(vc.getExpriationDate());
 		assertEquals("did:meta:0x11111111120", ((Map<String, String>)vc.getCredentialSubject()).get("id"));
 		assertEquals("mansud", ((Map<String, String>)vc.getCredentialSubject()).get("name"));
+		
+		vc.setExpirationDate(expire.getTime());
+		assertEquals(expire.getTime().getTime()/1000*1000, vc.getExpriationDate().getTime());
+
 		
 		System.out.println("vctest vc");
 		System.out.println(vc.toJSONString());
@@ -112,6 +116,7 @@ public class VCTest {
 			assertTrue(verifiedVc.getTypes().contains("NameCredential"));
 			assertEquals(vc.getIssuer(), verifiedVc.getIssuer());
 			assertEquals(vc.getIssunaceDate(), verifiedVc.getIssunaceDate());
+			assertEquals(vc.getExpriationDate(),  verifiedVc.getExpriationDate());
 			assertEquals(vc.getCredentialSubject(), verifiedVc.getCredentialSubject());
 
 			System.out.println("vctest verified vc");

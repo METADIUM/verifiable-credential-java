@@ -68,7 +68,12 @@ public class VerifiableCredential extends Verifiable {
 	 * @return issued date
 	 */
 	public Date getIssunaceDate() {
-		return DateUtils.fromRFC3339UTC(((String)jsonObject.get(JSONLD_KEY_ISSUANCE_DATE)));
+		String date = ((String)jsonObject.get(JSONLD_KEY_ISSUANCE_DATE));
+		if (date != null) {
+			return DateUtils.fromRFC3339UTC(date);
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -84,7 +89,11 @@ public class VerifiableCredential extends Verifiable {
 	 * @return expire date
 	 */
 	public Date getExpriationDate() {
-		return DateUtils.fromRFC3339UTC((String)jsonObject.get(JSONLD_KEY_EXPIRATION_DATE));
+		String date = (String)jsonObject.get(JSONLD_KEY_EXPIRATION_DATE);
+		if (date != null) {
+			return DateUtils.fromRFC3339UTC(date);
+		}
+		return null;
 	}
 	
 	/**
