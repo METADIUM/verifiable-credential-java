@@ -52,7 +52,8 @@ public class VerifiableCredential extends Verifiable {
 	 * @return issuer of credential
 	 */
 	public URI getIssuer() {
-		return URI.create((String)jsonObject.get(JSONLD_KEY_ISSUSER));
+		String iss = (String)jsonObject.get(JSONLD_KEY_ISSUSER);
+		return iss == null ? null : URI.create(iss);
 	}
 	
 	/**

@@ -88,7 +88,8 @@ public abstract class Verifiable {
 	 * @return id of verifiable credential
 	 */
 	public URI getId() {
-		return URI.create((String)jsonObject.get(JSONLD_KEY_ID));
+		String id = (String)jsonObject.get(JSONLD_KEY_ID);
+		return id == null ? null : URI.create(id);
 	}
 	
 	/**
