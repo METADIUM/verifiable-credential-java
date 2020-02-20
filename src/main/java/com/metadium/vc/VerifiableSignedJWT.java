@@ -60,6 +60,10 @@ public class VerifiableSignedJWT {
 		return jwts;
 	}
 	
+	public static SignedJWT sign(Verifiable verifiable, String kid, String nonce, ECDSASigner signer) throws JOSEException  {
+		return sign(verifiable, JWSAlgorithm.ES256K, kid, nonce, signer);
+	}
+	
 	/**
 	 * signed verifiable to Verifiable
 	 * @param signedVerifiable signed verifiable
