@@ -15,6 +15,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -53,6 +54,7 @@ public class VerifiableSignedJWT {
 		}
 		
 		// sign to JWT
+		signer.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 		JWSHeader jwsHeader = new JWSHeader(algorithm, JOSEObjectType.JWT, null, null, null, null, null, null, null, null, kid, null, null);
 		SignedJWT jwts = new SignedJWT(jwsHeader, claimsSet);
 		jwts.sign(signer);
