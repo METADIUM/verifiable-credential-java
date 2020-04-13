@@ -11,9 +11,13 @@ import java.util.TimeZone;
  *
  */
 public class DateUtils {
-	private static final SimpleDateFormat dateFormatRFC3339UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	static {
+	private static final String formatRFC3339UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	
+	public static SimpleDateFormat getDateFormatRFC3339UTC() {
+		SimpleDateFormat dateFormatRFC3339UTC = new SimpleDateFormat(formatRFC3339UTC);
 		dateFormatRFC3339UTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+		
+		return dateFormatRFC3339UTC;
 	}
 	
 	/**
@@ -22,7 +26,7 @@ public class DateUtils {
 	 * @return
 	 */
 	public static String toRFC3339UTC(Date date) {
-		return dateFormatRFC3339UTC.format(date);
+		return getDateFormatRFC3339UTC().format(date);
 	}
 	
 	/**
@@ -32,7 +36,7 @@ public class DateUtils {
 	 */
 	public static Date fromRFC3339UTC(String str) {
 		try {
-			return dateFormatRFC3339UTC.parse(str);
+			return getDateFormatRFC3339UTC().parse(str);
 		}
 		catch (ParseException e) {
 			return null;
