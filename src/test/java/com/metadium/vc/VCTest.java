@@ -15,6 +15,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -121,6 +122,76 @@ public class VCTest {
 
 			System.out.println("vctest verified vc");
 			System.out.println(verifiedVc.toJSONString());
+		} catch (JOSEException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void vctestIssuerObject() {
+		Calendar issued = Calendar.getInstance();
+		Calendar expire = Calendar.getInstance();
+		expire.setTime(issued.getTime());
+		expire.add(Calendar.DAY_OF_YEAR, 100);
+		
+		// Make Verifiable Credential
+		VerifiableCredential vc = new VerifiableCredential();
+		vc.setId(URI.create("http://aa.metadium.com/credential/343"));
+		vc.addTypes(Collections.singletonList("NameCredential"));
+		Map<String, String> issuerObject = new HashMap<String, String>();
+		issuerObject.put("name", "Coinplug");
+		vc.setIssuer(URI.create("did:meta:0x3489384932859420"), issuerObject);
+		vc.setIssuanceDate(issued.getTime());
+		LinkedHashMap<String, String> subject = new LinkedHashMap<>();
+		subject.put("id", "did:meta:0x11111111120");
+		subject.put("name", "mansud");
+		vc.setCredentialSubject(subject);
+		
+		// test
+		assertTrue(vc.getContexts().contains(VerifiableCredential.JSONLD_CONTEXT_CREDENTIALS));
+		assertEquals("http://aa.metadium.com/credential/343", vc.getId().toString());
+		assertTrue(vc.getTypes().contains(VerifiableCredential.JSONLD_TYPE_CREDENTIAL));
+		assertTrue(vc.getTypes().contains("NameCredential"));
+		assertEquals("did:meta:0x3489384932859420", vc.getIssuer().toString());
+		assertEquals("Coinplug", vc.getIssuerObject().get("name"));
+		assertEquals(issued.getTime().getTime()/1000*1000, vc.getIssunaceDate().getTime());
+		assertNull(vc.getExpriationDate());
+		assertEquals("did:meta:0x11111111120", ((Map<String, String>)vc.getCredentialSubject()).get("id"));
+		assertEquals("mansud", ((Map<String, String>)vc.getCredentialSubject()).get("name"));
+		
+		vc.setExpirationDate(expire.getTime());
+		assertEquals(expire.getTime().getTime()/1000*1000, vc.getExpriationDate().getTime());
+
+		
+		System.out.println("vctest vc");
+		System.out.println(vc.toJSONString());
+		
+		try {
+			//	Sign VC with ES256k (secp256k1).  keyID, nonce, private key
+			SignedJWT signedJWT = VerifiableSignedJWT.sign(vc, JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
+			String token = signedJWT.serialize();
+			System.out.println("vctest vc JWTs");
+			System.out.println(token);
+			
+			// verify SignedVC
+			assertTrue(signedJWT.verify(new ECDSAVerifier(publicKey)));
+			VerifiableCredential verifiedVc = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(signedJWT);
+
+			System.out.println("vctest verified vc");
+			System.out.println(verifiedVc.toJSONString());
+
+			// test
+			assertNotNull(verifiedVc);
+			assertEquals(vc.getId(), verifiedVc.getId());
+			assertTrue(verifiedVc.getTypes().contains("NameCredential"));
+			assertEquals(vc.getIssuer(), verifiedVc.getIssuer());
+			assertEquals(vc.getIssuerObject().get("name"), verifiedVc.getIssuerObject().get("name"));
+			assertEquals(vc.getIssunaceDate(), verifiedVc.getIssunaceDate());
+			assertEquals(vc.getExpriationDate(),  verifiedVc.getExpriationDate());
+			assertEquals(vc.getCredentialSubject(), verifiedVc.getCredentialSubject());
 
 		} catch (JOSEException e) {
 			e.printStackTrace();

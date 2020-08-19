@@ -97,9 +97,9 @@ public class VerifiableSignedJWT {
 		String issuer = claimsSet.getIssuer();
 		Date issuedDate = claimsSet.getIssueTime();
 		String subject = claimsSet.getSubject();
-		Object vcClaim = claimsSet.getClaim(JWT_PAYLOAD_VERIFIABLE_CREDENTIAL);
+		Map<String, Object> vcClaim = (Map<String, Object>)claimsSet.getClaim(JWT_PAYLOAD_VERIFIABLE_CREDENTIAL);
 		
-		VerifiableCredential vc = new VerifiableCredential((Map<String, Object>)vcClaim);
+		VerifiableCredential vc = new VerifiableCredential(vcClaim);
 		if (id != null) {
 			vc.setId(URI.create(id));
 		}
@@ -107,7 +107,13 @@ public class VerifiableSignedJWT {
 			vc.setExpirationDate(expireDate);
 		}
 		if (issuer != null) {
-			vc.setIssuer(URI.create(issuer));
+			Object issuerObject = vcClaim.get(VerifiableCredential.JSONLD_KEY_ISSUSER);
+			if (issuerObject instanceof Map) {
+				vc.setIssuer(URI.create(issuer), (Map<String, Object>)issuerObject);
+			}
+			else {
+				vc.setIssuer(URI.create(issuer));
+			}
 		}
 		if (issuedDate != null) {
 			vc.setIssuanceDate(issuedDate);
@@ -186,7 +192,12 @@ public class VerifiableSignedJWT {
 		if (issuer != null) {
 			// move issuer to jwt.iss
 			builder.issuer(issuer.toString());
+			
 			vcObject.remove(VerifiableCredential.JSONLD_KEY_ISSUSER);
+			Map<String, Object> issuerObject = vc.getIssuerObject();
+			if (issuerObject != null) {
+				vcObject.put(VerifiableCredential.JSONLD_KEY_ISSUSER, issuerObject);
+			}
 		}
 		if (issuedDate != null) {
 			// move issue time to jwt.nbf

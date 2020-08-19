@@ -47,13 +47,47 @@ public class VerifiableCredential extends Verifiable {
 		jsonObject.put(JSONLD_KEY_ISSUSER, issuer.toString());
 	}
 	
+	
+	public void setIssuer(URI issuer, Map<String, ?> issuerObject) {
+		Map<String, Object> object = new HashMap<String, Object>(issuerObject);
+		object.put("id", issuer.toString());
+		jsonObject.put(JSONLD_KEY_ISSUSER, object);
+	}
+	
 	/**
 	 * Get issuer
 	 * @return issuer of credential
 	 */
 	public URI getIssuer() {
-		String iss = (String)jsonObject.get(JSONLD_KEY_ISSUSER);
-		return iss == null ? null : URI.create(iss);
+		Object o = jsonObject.get(JSONLD_KEY_ISSUSER);
+		if (o instanceof String) {
+			return URI.create((String)o);
+		}
+		else if (o instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Object iss = ((Map<String, Object>)o).get("id");
+			if (iss != null) {
+				return URI.create(iss.toString());
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Get issuer object
+	 * @return object exclude id
+	 */
+	public Map<String, Object> getIssuerObject() {
+		Object o = jsonObject.get(JSONLD_KEY_ISSUSER);
+		if (o instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> issuerObject = new HashMap<>((Map<String, Object>)o);
+			
+			issuerObject.remove("id");
+			return issuerObject;
+		}
+		
+		return null;
 	}
 	
 	/**
