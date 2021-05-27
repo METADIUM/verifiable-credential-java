@@ -19,7 +19,7 @@ Add dependency
 <dependency>
     <groupId>com.github.METADIUM</groupId>
     <artifactId>verifiable-credential-java</artifactId>
-    <version>0.1.8</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 ### Gradle
@@ -36,7 +36,7 @@ Add dependency
 
 ```gradle
 dependencies {
-    implementation 'com.github.METADIUM:verifiable-credential-java:0.1.8'
+    implementation 'com.github.METADIUM:verifiable-credential-java:0.2.0'
 }
 ```
 If use Google service plug-in in android, add code
@@ -68,8 +68,7 @@ vc.setCredentialSubject(subject);
 
 ### Sign VerifiableCredential
 ```java
-SignedJWT signedVc = VerifiableSignedJWT.sign(
-    verifiableCredential,                           // verifiable credential
+SignedJWT signedVc = vc.sign(
     JWSAlgorithm.ES256K,
     "did:meta:0x348938499420#managementKey#4358",   // key id of signer
     "0d8mf03",                                      // nonce
@@ -84,7 +83,7 @@ SignedJWT signedVc = SignedJWT.parse(signedVcString);
 
 // verifying
 if (signedVc.verify(new ECDSAVerifier(publicKey))) {
-	VerifiableCredential verifiedVc = (VerifiableCredential)VerifiableSignedJWT.toVerifiable(signedVc);
+	VerifiableCredential verifiedVc = (VerifiableCredential)Verifiable.from(signedVc);
 	if (verifiedVc == null) {
 		// invalid vc
 		return;
@@ -109,8 +108,7 @@ vp.addVerifiableCredential(verifiableCredential_2);
 
 ### Sign Verifiable Presentation
 ```java
-SignedJWT signedVp = VerifiableSignedJWT.sign(
-    verifiablePresentation,                         // Verifiable presentation
+SignedJWT signedVp = vp.sign(
     JWSAlgorithm.ES256K, 
     "did:meta:0x348938499420#managementKey#4358",   // key id of holder
     "0d8mf03",                                      // nonce
@@ -125,7 +123,7 @@ SignedJWT signedVp = Signed.parse(signedVpString);
 
 // Verify verifiable presentation
 if (signedVp.verify(new ECDSAVerifier(publicKey))) {
-	VerifiablePresentation verifiedVp = (VerifiablePresentation)VerifiableSignedJWT.toVerifiable(signedVp);
+	VerifiablePresentation verifiedVp = (VerifiablePresentation)Verfiable.from(signedVp);
 	if (verifiedVp == null) {
 		// invalid vp
 		return;
