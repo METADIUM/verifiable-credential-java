@@ -15,6 +15,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -35,6 +36,7 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.StandardCharset;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 public class VCTest {
@@ -102,7 +104,7 @@ public class VCTest {
 		
 		try {
 			//	Sign VC with ES256k (secp256k1).  keyID, nonce, private key
-			SignedJWT signedJwt = vc.sign(JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
+			SignedJWT signedJwt = vc.sign("did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey));
 			String token = signedJwt.serialize();
 			System.out.println("vctest vc JWTs");
 			System.out.println(token);
@@ -110,7 +112,7 @@ public class VCTest {
 			// verify SignedVC
 			SignedJWT signedJWT = SignedJWT.parse(token);
 			assertTrue(signedJWT.verify(new ECDSAVerifier(publicKey)));
-			VerifiableCredential verifiedVc = (VerifiableCredential)Verifiable.from(signedJWT);
+			VerifiableCredential verifiedVc = new VerifiableCredential(signedJWT);
 			
 			// test
 			assertNotNull(verifiedVc);
@@ -172,14 +174,14 @@ public class VCTest {
 		
 		try {
 			//	Sign VC with ES256k (secp256k1).  keyID, nonce, private key
-			SignedJWT signedJWT = vc.sign(JWSAlgorithm.ES256K, "did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey)); 
+			SignedJWT signedJWT = vc.sign("did:meta:000003489384932859420#KeyManagement#73875892475", "0d8mf03", new ECDSASigner(privateKey)); 
 			String token = signedJWT.serialize();
 			System.out.println("vctest vc JWTs");
 			System.out.println(token);
 			
 			// verify SignedVC
 			assertTrue(signedJWT.verify(new ECDSAVerifier(publicKey)));
-			VerifiableCredential verifiedVc = (VerifiableCredential)Verifiable.from(signedJWT);
+			VerifiableCredential verifiedVc = new VerifiableCredential(signedJWT);
 
 			System.out.println("vctest verified vc");
 			System.out.println(verifiedVc.toJSONString());
@@ -237,7 +239,11 @@ public class VCTest {
 			System.out.println(vp.toJSONString());
 			
 			// Sign verifiable presentation with ES256k (secp256k1). keyID, nonce, private key
-			SignedJWT vpObject = vp.sign(JWSAlgorithm.ES256K, "did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(priKey));
+			Calendar cal = Calendar.getInstance();
+			cal.add(Calendar.SECOND, 15);
+			Date issueDate = new Date();
+			JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().notBeforeTime(issueDate).expirationTime(cal.getTime()).build();
+			SignedJWT vpObject = vp.sign("did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(priKey), claimsSet);
 			String vpToken = vpObject.serialize();
 			
 			System.out.println("test publickey : "+ Hex.toHexString(ECKeyUtils.encodePublicKey(pubKey)));
@@ -246,7 +252,9 @@ public class VCTest {
 			
 			// Verify verifiable presentation
 			assertTrue(vpObject.verify(new ECDSAVerifier(pubKey)));
-			VerifiablePresentation verifiedVp = (VerifiablePresentation)Verifiable.from(vpObject);
+			assertEquals(cal.getTime().getTime()/1000*1000, vpObject.getJWTClaimsSet().getExpirationTime().getTime());
+			assertEquals(issueDate.getTime()/1000*1000, vpObject.getJWTClaimsSet().getNotBeforeTime().getTime());
+			VerifiablePresentation verifiedVp = new VerifiablePresentation(vpObject);
 			
 			// test
 			assertNotNull(verifiedVp);
@@ -266,11 +274,11 @@ public class VCTest {
 
 				if (vcToken.equals(vc1)) {
 					assertTrue(vcJwt.verify(new ECDSAVerifier(vc1PublicKey)));
-					verifiedVc = (VerifiableCredential)Verifiable.from(vcJwt);
+					verifiedVc = new VerifiableCredential(vcJwt);
 				}
 				else if (vcToken.equals(vc2)) {
 					assertTrue(vcJwt.verify(new ECDSAVerifier(vc2PublicKey)));
-					verifiedVc = (VerifiableCredential)Verifiable.from(vcJwt);
+					verifiedVc = new VerifiableCredential(vcJwt);
 				}
 				else {
 					continue;
@@ -292,13 +300,13 @@ public class VCTest {
 		
 		SignedJWT signedVp = SignedJWT.parse(vp);
 		assertTrue(signedVp.verify(new ECDSAVerifier(publicKey)));
-		VerifiablePresentation verifiedVP = (VerifiablePresentation)Verifiable.from(signedVp);
+		VerifiablePresentation verifiedVP = new VerifiablePresentation(signedVp);
 		assertNotNull(verifiedVP);
 		if (verifiedVP != null) {
 			for (Object c : verifiedVP.getVerifiableCredentials()) {
 				SignedJWT signedVc = SignedJWT.parse((String)c);
 				assertTrue(signedVc.verify(new ECDSAVerifier(publicKey)));
-				VerifiableCredential verifiedVC = (VerifiableCredential)Verifiable.from(signedVc);
+				VerifiableCredential verifiedVC = new VerifiableCredential(signedVc);
 				assertNotNull(verifiedVC);
 			}
 		}		

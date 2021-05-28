@@ -19,7 +19,7 @@ Add dependency
 <dependency>
     <groupId>com.github.METADIUM</groupId>
     <artifactId>verifiable-credential-java</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 </dependency>
 ```
 ### Gradle
@@ -36,7 +36,7 @@ Add dependency
 
 ```gradle
 dependencies {
-    implementation 'com.github.METADIUM:verifiable-credential-java:0.2.0'
+    implementation 'com.github.METADIUM:verifiable-credential-java:0.2.1'
 }
 ```
 If use Google service plug-in in android, add code
@@ -69,7 +69,6 @@ vc.setCredentialSubject(subject);
 ### Sign VerifiableCredential
 ```java
 SignedJWT signedVc = vc.sign(
-    JWSAlgorithm.ES256K,
     "did:meta:0x348938499420#managementKey#4358",   // key id of signer
     "0d8mf03",                                      // nonce
     new ECDSASigner(privateKey)
@@ -83,7 +82,7 @@ SignedJWT signedVc = SignedJWT.parse(signedVcString);
 
 // verifying
 if (signedVc.verify(new ECDSAVerifier(publicKey))) {
-	VerifiableCredential verifiedVc = (VerifiableCredential)Verifiable.from(signedVc);
+	VerifiableCredential verifiedVc = new VerifiableCredential(signedVc);
 	if (verifiedVc == null) {
 		// invalid vc
 		return;
@@ -109,7 +108,6 @@ vp.addVerifiableCredential(verifiableCredential_2);
 ### Sign Verifiable Presentation
 ```java
 SignedJWT signedVp = vp.sign(
-    JWSAlgorithm.ES256K, 
     "did:meta:0x348938499420#managementKey#4358",   // key id of holder
     "0d8mf03",                                      // nonce
     new ECDSASigner(privateKey)
@@ -123,7 +121,7 @@ SignedJWT signedVp = Signed.parse(signedVpString);
 
 // Verify verifiable presentation
 if (signedVp.verify(new ECDSAVerifier(publicKey))) {
-	VerifiablePresentation verifiedVp = (VerifiablePresentation)Verfiable.from(signedVp);
+	VerifiablePresentation verifiedVp = new VerifiablePresentation(signedVp);
 	if (verifiedVp == null) {
 		// invalid vp
 		return;
