@@ -301,8 +301,9 @@ public class VerifiableCredential extends Verifiable {
 	 * Get credential subject 
 	 * @return credential subject
 	 */
-	public Object getCredentialSubject() {
-		return jsonObject.get(JSONLD_KEY_CREDENTIAL_SUBJECT);
+	@SuppressWarnings("unchecked")
+	public <T> T getCredentialSubject() {
+		return (T)jsonObject.get(JSONLD_KEY_CREDENTIAL_SUBJECT);
 	}
 
 	/**
