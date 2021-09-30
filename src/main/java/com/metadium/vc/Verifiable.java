@@ -34,7 +34,7 @@ public abstract class Verifiable {
 	public static final String JSONLD_KEY_PROOF = "proof";
 
 	// context
-	public static final String JSONLD_CONTEXT_CREDENTIALS = "https://w3id.org/credentials/v1";
+	public static final String JSONLD_CONTEXT_CREDENTIALS = "https://www.w3.org/2018/credentials/v1";
 	
 	protected static final String JWT_HEADER_NONCE = "nonce";
 	

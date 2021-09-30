@@ -13,6 +13,7 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.ECGenParameterSpec;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -242,7 +243,11 @@ public class VCTest {
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.SECOND, 15);
 			Date issueDate = new Date();
-			JWTClaimsSet claimsSet = new JWTClaimsSet.Builder().notBeforeTime(issueDate).expirationTime(cal.getTime()).build();
+			JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+					.notBeforeTime(issueDate)
+					.expirationTime(cal.getTime())
+					.audience(Arrays.asList("test"))
+					.build();
 			SignedJWT vpObject = vp.sign("did:meta:0x3489384932859420#ManagementKey#4382758295", "0d8mf03", new ECDSASigner(priKey), claimsSet);
 			String vpToken = vpObject.serialize();
 			
